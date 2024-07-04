@@ -2632,42 +2632,45 @@ static void modeS_send_SBS_output (const modeS_message *mm, const aircraft *a)
 
   if (mm->msg_type == 0)
   {
-    p += sprintf (p, "MSG,5,1,1,%06X,1,%s,,%d,,,,,,,,,,",
+      // The SBS format MSG 5 does not have the Emergency flag in the output, but making it consistent here
+    p += sprintf (p, "MSG,5,1,1,%06X,1,%s,,%d,,,,,,,%d,%d,%d,%d",
                   aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
-                  date_str, mm->altitude);
+                  date_str, mm->altitude, alert, emergency, spi, ground);
   }
   else if (mm->msg_type == 4)
   {
+      // The SBS format MSG 5 does not have the Emergency flag in the output
     p += sprintf (p, "MSG,5,1,1,%06X,1,%s,,%d,,,,,,,%d,%d,%d,%d",
                   aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
                   date_str, mm->altitude, alert, emergency, spi, ground);
   }
   else if (mm->msg_type == 5)
   {
-    p += sprintf (p, "MSG,6,1,1,%06X,1,%s,,,,,,,,%d,%d,%d,%d,%d",
+    p += sprintf (p, "MSG,6,1,1,%06X,1,%s,,%d,,,,,,%d,%d,%d,%d,%d",
                   aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
-                  date_str, mm->identity, alert, emergency, spi, ground);
+                  date_str, mm->altitude, mm->identity, alert, emergency, spi, ground);
   }
   else if (mm->msg_type == 11)
   {
-    p += sprintf (p, "MSG,8,1,1,%06X,1,%s,,,,,,,,,,,,",
-                  aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]), date_str);
+    p += sprintf (p, "MSG,8,1,1,%06X,1,%s,,,,,,,,,,,,%d",
+                  aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]), date_str, ground);
   }
   else if (mm->msg_type == 17 && mm->ME_type == 4)
   {
-    p += sprintf (p, "MSG,1,1,1,%06X,1,%s,%s,,,,,,,,0,0,0,0",
+    // The SBS format MSG 1 does not have the final four 0's in the MSG (alert, emergency, spi, gnd)
+    p += sprintf (p, "MSG,1,1,1,%06X,1,%s,%s,,,,,,,,,,,",
                   aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
                   date_str, mm->flight);
   }
   else if (mm->msg_type == 17 && mm->ME_type >= 9 && mm->ME_type <= 18)
   {
     if (!VALID_POS(a->position))
-         p += sprintf (p, "MSG,3,1,1,%06X,1,%s,,%d,,,,,,,0,0,0,0",
+         p += sprintf (p, "MSG,3,1,1,%06X,1,%s,,%d,,,,,,,%d,%d,%d,%d",
                        aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
-                       date_str, mm->altitude);
-    else p += sprintf (p, "MSG,3,1,1,%06X,1,%s,,%d,,,%1.5f,%1.5f,,,0,0,0,0",
+                       date_str, mm->altitude, alert, emergency, spi, ground);
+    else p += sprintf (p, "MSG,3,1,1,%06X,1,%s,,%d,,,%1.5f,%1.5f,,,%d,%d,%d,%d",
                        aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
-                       date_str, mm->altitude, a->position.lat, a->position.lon);
+                       date_str, mm->altitude, a->position.lat, a->position.lon, alert, emergency, spi, ground);
   }
   else if (mm->msg_type == 17 && mm->ME_type == 19 && mm->ME_subtype == 1)
   {
@@ -2679,9 +2682,9 @@ static void modeS_send_SBS_output (const modeS_message *mm, const aircraft *a)
   }
   else if (mm->msg_type == 21)
   {
-    p += sprintf (p, "MSG,6,1,1,%06X,1,%s,,,,,,,,%d,%d,%d,%d,%d",
+    p += sprintf (p, "MSG,6,1,1,%06X,1,%s,,%d,,,,,,%d,%d,%d,%d,%d",
                   aircraft_get_addr(mm->AA[0], mm->AA[1], mm->AA[2]),
-                  date_str, mm->identity, alert, emergency, spi, ground);
+                  date_str, mm->altitude, mm->identity, alert, emergency, spi, ground);
   }
   else
     return;
